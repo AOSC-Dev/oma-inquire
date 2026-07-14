@@ -225,7 +225,7 @@ impl<'a> Editor<'a> {
         self,
         backend: &mut B,
     ) -> InquireResult<String> {
-        EditorPrompt::new(self)?.prompt(backend)
+        EditorPrompt::new(self)?.prompt(backend, false)
     }
 }
 
