@@ -6,7 +6,7 @@ use crate::{
     formatter::StringFormatter,
     input::{Input, InputActionResult},
     list_option::ListOption,
-    prompts::prompt::{ActionResult, Prompt},
+    prompts::prompt::{ActionResult, ActionState, Prompt},
     ui::TextBackend,
     utils::paginate,
     validator::{ErrorMessage, StringValidator, Validation},
@@ -197,7 +197,7 @@ where
         Ok(result)
     }
 
-    fn handle(&mut self, action: TextPromptAction) -> InquireResult<ActionResult> {
+    fn handle(&mut self, action: TextPromptAction) -> InquireResult<ActionState> {
         let result = match action {
             TextPromptAction::ValueInput(input_action) => {
                 let result = self.input.handle(input_action);
@@ -225,7 +225,7 @@ where
             }
         };
 
-        Ok(result)
+        Ok(result.into())
     }
 
     fn render(&self, backend: &mut Backend) -> InquireResult<()> {

@@ -471,10 +471,7 @@ where
     T: Terminal,
 {
     fn render_sort_prompt(&mut self, prompt: &str) -> Result<()> {
-        // 1. 调用内置的 print_prompt 渲染头部 "? Message"
         self.print_prompt(prompt)?;
-
-        // 2. 干净利落地追加换行符，将光标推到下一行
         self.new_line()
     }
 

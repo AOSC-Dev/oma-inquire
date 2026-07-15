@@ -1,6 +1,6 @@
 use crate::{
     ui::{Key, KeyModifiers},
-    InnerAction,
+    EscapePolicy, InnerAction,
 };
 
 use super::config::SortConfig;
@@ -23,9 +23,14 @@ pub enum SortPromptAction {
     MoveToEnd,
     /// Toggles the selected state (active/inactive) of the current highlighted item.
     ToggleOption,
+    /// Press Escape
+    PressEscape,
+    /// Submit order
+    Submit,
 }
 
 impl InnerAction for SortPromptAction {
+    const ESCAPE_POLICY: EscapePolicy = EscapePolicy::IgnoreEscape;
     type Config = SortConfig;
 
     fn from_key(key: Key, config: &SortConfig) -> Option<Self> {
@@ -56,6 +61,10 @@ impl InnerAction for SortPromptAction {
 
             // 空格键：选中/取消选中
             Key::Char(' ', KeyModifiers::NONE) | Key::Toggle => Self::ToggleOption,
+            Key::Escape => Self::PressEscape,
+            Key::Enter
+            | Key::Char('\n', KeyModifiers::NONE)
+            | Key::Char('j', KeyModifiers::CONTROL) => Self::Submit,
             _ => return None,
         };
 

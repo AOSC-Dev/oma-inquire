@@ -1,6 +1,5 @@
 use crate::prompts::sort::Sort;
 
-
 /// Configuration settings used in the execution of a SortPrompt.
 #[derive(Copy, Clone, Debug)]
 pub struct SortConfig {

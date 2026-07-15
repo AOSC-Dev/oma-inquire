@@ -1,6 +1,6 @@
 use crate::{
     ui::{Key, KeyModifiers},
-    InnerAction, InputAction,
+    EscapePolicy, InnerAction, InputAction,
 };
 
 use super::config::MultiSelectConfig;
@@ -32,6 +32,7 @@ pub enum MultiSelectPromptAction {
 
 impl InnerAction for MultiSelectPromptAction {
     type Config = MultiSelectConfig;
+    const ESCAPE_POLICY: EscapePolicy = EscapePolicy::SubmitOnEscape;
 
     fn from_key(key: Key, config: &MultiSelectConfig) -> Option<Self> {
         if config.vim_mode {
@@ -65,9 +66,5 @@ impl InnerAction for MultiSelectPromptAction {
         };
 
         Some(action)
-    }
-
-    fn is_multiselect() -> bool {
-        true
     }
 }

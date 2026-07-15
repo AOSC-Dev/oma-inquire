@@ -9,7 +9,7 @@ use crate::{
     date_utils::{get_current_date, get_month},
     error::InquireResult,
     formatter::DateFormatter,
-    prompts::prompt::{ActionResult, Prompt},
+    prompts::prompt::{ActionResult, ActionState, Prompt},
     ui::date::DateSelectBackend,
     validator::{DateValidator, ErrorMessage, Validation},
     DateSelect, InquireError,
@@ -143,7 +143,7 @@ where
         Ok(answer)
     }
 
-    fn handle(&mut self, action: DateSelectPromptAction) -> InquireResult<ActionResult> {
+    fn handle(&mut self, action: DateSelectPromptAction) -> InquireResult<ActionState> {
         let result = match action {
             DateSelectPromptAction::GoToPrevWeek => self.shift_date(
                 Duration::try_weeks(-1)
@@ -167,7 +167,7 @@ where
             DateSelectPromptAction::GoToNextMonth => self.shift_months(1),
         };
 
-        Ok(result)
+        Ok(result.into())
     }
 
     fn render(&self, backend: &mut B) -> InquireResult<()> {

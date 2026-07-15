@@ -2,7 +2,7 @@ use crate::{
     error::InquireResult,
     formatter::StringFormatter,
     input::Input,
-    prompts::prompt::{ActionResult, Prompt},
+    prompts::prompt::{ActionResult, ActionState, Prompt},
     ui::PasswordBackend,
     validator::{ErrorMessage, StringValidator, Validation},
     InquireError, Password, PasswordDisplayMode,
@@ -195,7 +195,7 @@ where
         Ok(result)
     }
 
-    fn handle(&mut self, action: PasswordPromptAction) -> InquireResult<ActionResult> {
+    fn handle(&mut self, action: PasswordPromptAction) -> InquireResult<ActionState> {
         let result = match action {
             PasswordPromptAction::ValueInput(input_action) => {
                 self.active_input_mut().handle(input_action).into()
@@ -203,7 +203,7 @@ where
             PasswordPromptAction::ToggleDisplayMode => self.toggle_display_mode(),
         };
 
-        Ok(result)
+        Ok(result.into())
     }
 
     fn render(&self, backend: &mut Backend) -> InquireResult<()> {

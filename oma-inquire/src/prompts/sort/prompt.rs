@@ -5,7 +5,7 @@ use crate::{
     formatter::MultiOptionFormatter,
     list_option::ListOption,
     prompts::{
-        prompt::{ActionResult, Prompt},
+        prompt::{ActionResult, ActionState, Prompt},
         sort::Sort,
     },
     ui::SortBackend,
@@ -160,30 +160,43 @@ where
         Ok(Some(self.get_final_answer()))
     }
 
-    fn handle(&mut self, action: SortPromptAction) -> InquireResult<ActionResult> {
+    fn handle(&mut self, action: SortPromptAction) -> InquireResult<ActionState> {
         let result = match action {
             SortPromptAction::ToggleOption => {
                 self.is_grabbing = !self.is_grabbing;
-                ActionResult::NeedsRedraw
+                ActionState::Render(ActionResult::NeedsRedraw)
             }
-            SortPromptAction::MoveUp => {
+            SortPromptAction::MoveUp => ActionState::Render(if self.is_grabbing {
+                self.drag_item_up()
+            } else {
+                self.move_cursor_up(1, true)
+            }),
+            SortPromptAction::MoveDown => ActionState::Render(if self.is_grabbing {
+                self.drag_item_down()
+            } else {
+                self.move_cursor_down(1, true)
+            }),
+            SortPromptAction::PageUp => {
+                ActionState::Render(self.move_cursor_up(self.config.page_size, false))
+            }
+            SortPromptAction::PageDown => {
+                ActionState::Render(self.move_cursor_down(self.config.page_size, false))
+            }
+            SortPromptAction::MoveToStart => {
+                ActionState::Render(self.move_cursor_up(usize::MAX, false))
+            }
+            SortPromptAction::MoveToEnd => {
+                ActionState::Render(self.move_cursor_down(usize::MAX, false))
+            }
+            SortPromptAction::PressEscape => {
                 if self.is_grabbing {
-                    self.drag_item_up()
+                    self.is_grabbing = false;
+                    ActionState::Render(ActionResult::NeedsRedraw)
                 } else {
-                    self.move_cursor_up(1, true)
+                    ActionState::RequestCancel
                 }
             }
-            SortPromptAction::MoveDown => {
-                if self.is_grabbing {
-                    self.drag_item_down()
-                } else {
-                    self.move_cursor_down(1, true)
-                }
-            }
-            SortPromptAction::PageUp => self.move_cursor_up(self.config.page_size, false),
-            SortPromptAction::PageDown => self.move_cursor_down(self.config.page_size, false),
-            SortPromptAction::MoveToStart => self.move_cursor_up(usize::MAX, false),
-            SortPromptAction::MoveToEnd => self.move_cursor_down(usize::MAX, false),
+            SortPromptAction::Submit => ActionState::RequestSubmit,
         };
 
         Ok(result)

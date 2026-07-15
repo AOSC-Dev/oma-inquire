@@ -5,7 +5,7 @@ use crate::{
     formatter::MultiOptionFormatter,
     input::{Input, InputActionResult},
     list_option::ListOption,
-    prompts::prompt::{ActionResult, Prompt},
+    prompts::prompt::{ActionResult, ActionState, Prompt},
     type_aliases::Scorer,
     ui::MultiSelectBackend,
     utils::paginate,
@@ -278,7 +278,7 @@ where
         Ok(answer)
     }
 
-    fn handle(&mut self, action: MultiSelectPromptAction) -> InquireResult<ActionResult> {
+    fn handle(&mut self, action: MultiSelectPromptAction) -> InquireResult<ActionState> {
         let result = match action {
             MultiSelectPromptAction::MoveUp => self.move_cursor_up(1, true),
             MultiSelectPromptAction::MoveDown => self.move_cursor_down(1, true),
@@ -316,7 +316,7 @@ where
 
         let result = self.clear_input_if_needed(action).merge(result);
 
-        Ok(result)
+        Ok(result.into())
     }
 
     fn render(&self, backend: &mut Backend) -> InquireResult<()> {

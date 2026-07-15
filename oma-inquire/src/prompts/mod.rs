@@ -10,10 +10,10 @@ mod one_liners;
 mod password;
 mod prompt;
 mod select;
+mod sort;
 #[cfg(test)]
 pub(crate) mod test;
 mod text;
-mod sort;
 
 pub use action::*;
 pub use confirm::*;
@@ -27,5 +27,5 @@ pub use multiselect::*;
 pub use one_liners::*;
 pub use password::*;
 pub use select::*;
-pub use text::*;
 pub use sort::*;
+pub use text::*;

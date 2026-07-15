@@ -5,7 +5,7 @@ use crate::{
     formatter::OptionFormatter,
     input::{Input, InputActionResult},
     list_option::ListOption,
-    prompts::prompt::{ActionResult, Prompt},
+    prompts::prompt::{ActionResult, ActionState, Prompt},
     type_aliases::Scorer,
     ui::SelectBackend,
     utils::paginate,
@@ -191,7 +191,7 @@ where
         Ok(answer)
     }
 
-    fn handle(&mut self, action: SelectPromptAction) -> InquireResult<ActionResult> {
+    fn handle(&mut self, action: SelectPromptAction) -> InquireResult<ActionState> {
         let result = match action {
             SelectPromptAction::MoveUp => self.move_cursor_up(1, true),
             SelectPromptAction::MoveDown => self.move_cursor_down(1, true),
@@ -214,7 +214,7 @@ where
             },
         };
 
-        Ok(result)
+        Ok(result.into())
     }
 
     fn render(&self, backend: &mut Backend) -> InquireResult<()> {
