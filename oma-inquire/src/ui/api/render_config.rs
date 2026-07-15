@@ -134,6 +134,12 @@ pub struct RenderConfig<'a> {
     /// a separator from the prefix.
     pub selected_option: Option<StyleSheet>,
 
+    /// Active grabbing indicator when sorting options.
+    pub sort_grabbing_indicator: Styled<&'a str>,
+
+    /// Idle indicator when sorting options (not grabbed).
+    pub sort_idle_indicator: Styled<&'a str>,
+
     /// Render configuration for calendar
 
     #[cfg(feature = "date")]
@@ -177,6 +183,8 @@ impl<'a> RenderConfig<'a> {
 
             #[cfg(feature = "editor")]
             editor_prompt: StyleSheet::empty(),
+            sort_grabbing_indicator: Styled::new("↕"),
+            sort_idle_indicator: Styled::new("•"),
         }
     }
 
@@ -202,6 +210,8 @@ impl<'a> RenderConfig<'a> {
             option_index_prefix: IndexPrefix::None,
             option: StyleSheet::empty(),
             selected_option: Some(StyleSheet::new().with_fg(Color::LightCyan)),
+            sort_grabbing_indicator: Styled::new("↕"),
+            sort_idle_indicator: Styled::new("•"),
 
             #[cfg(feature = "date")]
             calendar: calendar::CalendarRenderConfig::default_colored(),
@@ -310,6 +320,18 @@ impl<'a> RenderConfig<'a> {
         canceled_prompt_indicator: Styled<&'a str>,
     ) -> Self {
         self.canceled_prompt_indicator = canceled_prompt_indicator;
+        self
+    }
+
+    /// Sets the styled component for grabbing indicator in Sort prompts.
+    pub fn with_sort_grabbing_indicator(mut self, indicator: Styled<&'a str>) -> Self {
+        self.sort_grabbing_indicator = indicator;
+        self
+    }
+
+    /// Sets the styled component for idle indicator in Sort prompts.
+    pub fn with_sort_idle_indicator(mut self, indicator: Styled<&'a str>) -> Self {
+        self.sort_idle_indicator = indicator;
         self
     }
 

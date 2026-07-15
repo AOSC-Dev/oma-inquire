@@ -13,6 +13,7 @@ mod select;
 #[cfg(test)]
 pub(crate) mod test;
 mod text;
+mod sort;
 
 pub use action::*;
 pub use confirm::*;
@@ -27,3 +28,4 @@ pub use one_liners::*;
 pub use password::*;
 pub use select::*;
 pub use text::*;
+pub use sort::*;

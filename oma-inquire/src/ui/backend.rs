@@ -54,6 +54,22 @@ pub trait MultiSelectBackend: CommonBackend {
     ) -> Result<()>;
 }
 
+/// 专用于 Sort（排序）组件的渲染 Backend
+pub trait SortBackend: CommonBackend {
+    /// 渲染排序提示语（Header 部分）
+    fn render_sort_prompt(&mut self, prompt: &str) -> Result<()>;
+
+    /// 渲染待排序的选项列表
+    /// - `page`: 当前分页的数据
+    /// - `cursor_index`: 当前光标悬停、准备进行拖拽的元素索引
+    fn render_sort_options<D: Display>(
+        &mut self,
+        page: Page<'_, ListOption<D>>,
+        cursor_index: usize,
+        is_reordering: bool,
+    ) -> Result<()>;
+}
+
 pub trait CustomTypeBackend: CommonBackend {
     fn render_prompt(
         &mut self,
@@ -442,6 +458,77 @@ where
 
             self.print_option_value(idx, option, &page)?;
 
+            self.new_line()?;
+        }
+
+        Ok(())
+    }
+}
+
+impl<'a, I, T> SortBackend for Backend<'a, I, T>
+where
+    I: InputReader,
+    T: Terminal,
+{
+    fn render_sort_prompt(&mut self, prompt: &str) -> Result<()> {
+        // 1. 调用内置的 print_prompt 渲染头部 "? Message"
+        self.print_prompt(prompt)?;
+
+        // 2. 干净利落地追加换行符，将光标推到下一行
+        self.new_line()
+    }
+
+    fn render_sort_options<D: Display>(
+        &mut self,
+        page: Page<'_, ListOption<D>>,
+        cursor_index: usize,
+        is_reordering: bool,
+    ) -> Result<()> {
+        for (idx, option) in page.content.iter().enumerate() {
+            // 1. 渲染行首的光标指示符（例如当前的激活行会带有 `❯`，其他行是空白）
+            self.print_option_prefix(idx, &page)?;
+
+            self.frame_renderer.write(" ")?;
+
+            // 2. 渲染选项的序号前缀（如果有的话，例如 `1.`、`2.` 等）
+            if let Some(res) = self.print_option_index_prefix(option.index, page.total) {
+                res?;
+                self.frame_renderer.write(" ")?;
+            }
+
+            // 3. 渲染代表排序状态的图标，而不是多选的 checkbox
+            // - 当前光标指着的、准备进行位置拖拽的元素，渲染为“已激活/抓住”的标识（比如选配实心圆/选中样式）
+            // - 其他静止元素，渲染为空心圆/默认样式
+            let is_currently_dragging = option.index == cursor_index && is_reordering;
+            let mut sort_indicator = if is_currently_dragging {
+                self.render_config.sort_grabbing_indicator
+            } else {
+                self.render_config.sort_idle_indicator
+            };
+
+            // 4. 光标悬停行高亮
+            let is_hovering = page.cursor == Some(idx);
+            if is_hovering {
+                if let Some(stylesheet) = self.render_config.selected_option {
+                    sort_indicator.style = stylesheet;
+                }
+            }
+
+            // 如果当前项高亮，且匹配到了 cursor，应用高亮样式
+            match (self.render_config.selected_option, page.cursor) {
+                (Some(stylesheet), Some(cursor)) if cursor == idx => {
+                    sort_indicator.style = stylesheet;
+                }
+                _ => {}
+            }
+
+            self.frame_renderer.write_styled(sort_indicator)?;
+            self.frame_renderer.write(" ")?;
+
+            // 4. 渲染具体的选项文本值
+            self.print_option_value(idx, option, &page)?;
+
+            // 5. 换行，为下一项做准备
             self.new_line()?;
         }
 
