@@ -66,4 +66,8 @@ impl InnerAction for MultiSelectPromptAction {
 
         Some(action)
     }
+
+    fn is_multiselect() -> bool {
+        true
+    }
 }

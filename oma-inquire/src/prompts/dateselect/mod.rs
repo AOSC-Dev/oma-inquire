@@ -263,6 +263,6 @@ impl<'a> DateSelect<'a> {
         self,
         backend: &mut B,
     ) -> InquireResult<NaiveDate> {
-        DateSelectPrompt::new(self)?.prompt(backend, false)
+        DateSelectPrompt::new(self)?.prompt(backend)
     }
 }
