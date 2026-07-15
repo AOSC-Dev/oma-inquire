@@ -35,21 +35,35 @@ where
     where
         I: InnerAction<Config = C>,
     {
-        let multiselect = I::is_multiselect();
         match key {
             Key::Enter
             | Key::Char('\n', KeyModifiers::NONE)
             | Key::Char('j', KeyModifiers::CONTROL)
-                if !multiselect =>
+                if I::ESCAPE_POLICY == EscapePolicy::CancelOnEscape =>
             {
                 Some(Action::Submit)
             }
-            Key::Escape if multiselect => Some(Action::Submit),
-            Key::Escape => Some(Action::Cancel),
+            Key::Escape if I::ESCAPE_POLICY == EscapePolicy::SubmitOnEscape => Some(Action::Submit),
+            Key::Escape if I::ESCAPE_POLICY == EscapePolicy::CancelOnEscape => Some(Action::Cancel),
             Key::Char('c', KeyModifiers::CONTROL) => Some(Action::Interrupt),
             key => I::from_key(key, config).map(Action::Inner),
         }
     }
+}
+
+/// Defers and configures the core submit/cancel control flow behavior for prompt inputs.
+///
+/// This policy decouples individual components from the global key mapper. Instead of hardcoding
+/// specific component behaviors (e.g., checking if an action belongs to a multi-select prompt),
+/// components advertise their structural key handling strategy via this enum.
+#[derive(Copy, Clone, Debug, PartialEq, Eq)]
+pub enum EscapePolicy {
+    /// Esc 取消组件
+    CancelOnEscape,
+    /// Esc 作为确认并提交
+    SubmitOnEscape,
+    /// 把 Esc 忽略或交给自定义配置
+    IgnoreEscape,
 }
 
 /// InnerActions are specialized prompt actions.
@@ -60,6 +74,9 @@ pub trait InnerAction
 where
     Self: Sized + Copy + Clone + PartialEq + Eq,
 {
+    /// 默认情况下，cancel 为退出，enter 为 submit
+    const ESCAPE_POLICY: EscapePolicy = EscapePolicy::CancelOnEscape;
+
     /// Configuration type for the prompt.
     ///
     /// This is used to derive the action from a key event.
@@ -69,11 +86,6 @@ where
     fn from_key(key: Key, config: &Self::Config) -> Option<Self>
     where
         Self: Sized;
-
-    /// Is multi select
-    fn is_multiselect() -> bool {
-        false
-    }
 }
 
 #[cfg(test)]

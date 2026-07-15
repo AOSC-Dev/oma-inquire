@@ -4,6 +4,22 @@ use crate::{error::InquireResult, input::InputActionResult, ui::CommonBackend, I
 
 use super::action::{Action, InnerAction};
 
+/// 描述组件处理完内部动作后，希望外层 Run Loop 怎么做
+pub enum ActionState {
+    /// 触发重新渲染或清屏幕
+    Render(ActionResult),
+    /// 提交当前数据
+    RequestSubmit,
+    /// 取消操作
+    RequestCancel,
+}
+
+impl From<ActionResult> for ActionState {
+    fn from(value: ActionResult) -> Self {
+        ActionState::Render(value)
+    }
+}
+
 /// Represents the result of an action on the prompt.
 #[derive(Copy, Clone, Debug, PartialEq, Eq)]
 pub enum ActionResult {
@@ -102,7 +118,7 @@ where
     ///
     /// On testing scenarios, developers might provide a stream of actions
     /// to the prompt, which will then be submitted to this method just the same.
-    fn handle(&mut self, action: Self::InnerAction) -> InquireResult<ActionResult>;
+    fn handle(&mut self, action: Self::InnerAction) -> InquireResult<ActionState>;
 
     /// Hook called for the rendering of the prompt UI.
     ///
@@ -151,7 +167,27 @@ where
                         ActionResult::NeedsRedraw
                     }
                     Action::Interrupt => return Err(InquireError::OperationInterrupted),
-                    Action::Inner(inner_action) => self.handle(inner_action)?,
+                    Action::Inner(inner_action) => match self.handle(inner_action)? {
+                        ActionState::Render(action_result) => action_result,
+                        ActionState::RequestSubmit => {
+                            if let Some(answer) = self.submit()? {
+                                break answer;
+                            }
+                            ActionResult::NeedsRedraw
+                        }
+                        ActionState::RequestCancel => {
+                            let pre_cancel_result = self.pre_cancel()?;
+
+                            if pre_cancel_result {
+                                backend.frame_setup()?;
+                                backend.render_canceled_prompt(self.message())?;
+                                backend.frame_finish(true)?;
+                                return Err(InquireError::OperationCanceled);
+                            }
+
+                            ActionResult::NeedsRedraw
+                        }
+                    },
                 };
             }
         };

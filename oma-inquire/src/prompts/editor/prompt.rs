@@ -5,7 +5,7 @@ use tempfile::NamedTempFile;
 use crate::{
     error::InquireResult,
     formatter::StringFormatter,
-    prompts::prompt::{ActionResult, Prompt},
+    prompts::prompt::{ActionResult, ActionState, Prompt},
     ui::EditorBackend,
     validator::{ErrorMessage, StringValidator, Validation},
     Editor, InquireError,
@@ -128,11 +128,11 @@ where
         Ok(answer)
     }
 
-    fn handle(&mut self, action: EditorPromptAction) -> InquireResult<ActionResult> {
+    fn handle(&mut self, action: EditorPromptAction) -> InquireResult<ActionState> {
         match action {
             EditorPromptAction::OpenEditor => {
                 self.run_editor()?;
-                Ok(ActionResult::NeedsRedraw)
+                Ok(ActionResult::NeedsRedraw.into())
             }
         }
     }
