@@ -35,11 +35,17 @@ where
     where
         I: InnerAction<Config = C>,
     {
+        let multiselect = I::is_multiselect();
         match key {
             Key::Enter
             | Key::Char('\n', KeyModifiers::NONE)
-            | Key::Char('j', KeyModifiers::CONTROL) => Some(Action::Submit),
-            Key::Escape | Key::Char('g' | 'd', KeyModifiers::CONTROL) => Some(Action::Cancel),
+            | Key::Char('j', KeyModifiers::CONTROL)
+                if !multiselect =>
+            {
+                Some(Action::Submit)
+            }
+            Key::Escape if multiselect => Some(Action::Submit),
+            Key::Escape => Some(Action::Cancel),
             Key::Char('c', KeyModifiers::CONTROL) => Some(Action::Interrupt),
             key => I::from_key(key, config).map(Action::Inner),
         }
@@ -63,6 +69,11 @@ where
     fn from_key(key: Key, config: &Self::Config) -> Option<Self>
     where
         Self: Sized;
+
+    /// Is multi select
+    fn is_multiselect() -> bool {
+        false
+    }
 }
 
 #[cfg(test)]
