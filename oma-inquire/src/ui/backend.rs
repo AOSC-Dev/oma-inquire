@@ -79,6 +79,10 @@ pub trait CustomTypeBackend: CommonBackend {
     ) -> Result<()>;
 }
 
+pub trait ConfirmBackend: CommonBackend {
+    fn render_prompt(&mut self, prompt: &str, default: Option<&str>) -> InquireResult<()>;
+}
+
 pub trait PasswordBackend: CommonBackend {
     fn render_prompt(&mut self, prompt: &str) -> Result<()>;
     fn render_prompt_with_masked_input(&mut self, prompt: &str, cur_input: &Input) -> Result<()>;
@@ -732,6 +736,20 @@ where
     }
 }
 
+impl<'a, I, T> ConfirmBackend for Backend<'a, I, T>
+where
+    I: InputReader,
+    T: Terminal,
+{
+    fn render_prompt(&mut self, prompt: &str, default: Option<&str>) -> InquireResult<()> {
+        let options_str = default.unwrap_or("y/n");
+        let virtual_input = Input::new_with("");
+        self.print_prompt_with_input(prompt, Some(&options_str), &virtual_input)?;
+
+        Ok(())
+    }
+}
+
 impl<'a, I, T> InputReader for Backend<'a, I, T>
 where
     I: InputReader,
@@ -750,7 +768,7 @@ pub(crate) mod test {
 
     use crate::{
         input::Input,
-        ui::{InputReader, Key},
+        ui::{ConfirmBackend, InputReader, Key},
         validator::ErrorMessage,
     };
 
@@ -828,6 +846,24 @@ pub(crate) mod test {
                     std::io::ErrorKind::UnexpectedEof,
                     "No more keys in input",
                 )))
+        }
+    }
+
+    impl ConfirmBackend for FakeBackend {
+        fn render_prompt(
+            &mut self,
+            prompt: &str,
+            default: Option<&str>,
+        ) -> crate::error::InquireResult<()> {
+            // 1. 记录提示词 Token，用于测试断言
+            self.push_token(Token::Prompt(prompt.into()));
+
+            // 2. 如果有默认值提示（例如 "Y/n"），记录 DefaultValue Token
+            if let Some(default_str) = default {
+                self.push_token(Token::DefaultValue(default_str.into()));
+            }
+
+            Ok(())
         }
     }
 
