@@ -28,7 +28,7 @@ fn main() {
             false => String::from("não"),
         },
         render_config: RenderConfig::default(),
-        error_meesage: "Invalid answer, try typing 'y' for yes or 'n' for no".to_string(),
+        error_meesage: "Invalid answer, try typing 'y' for yes or 'n' for no".to_string()
     }
     .prompt()
     .unwrap();
