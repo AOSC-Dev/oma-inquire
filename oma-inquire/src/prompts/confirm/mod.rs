@@ -33,10 +33,6 @@ pub struct Confirm<'a> {
     /// 默认将 `true` 格式化为 "Yes"，`false` 格式化为 "No"。
     pub formatter: BoolFormatter<'a>,
 
-    /// 格式化默认值文本展示的函数。
-    /// 默认将 `true` 格式化为 "Y/n"，`false` 格式化为 "y/N"。
-    pub default_value_formatter: BoolFormatter<'a>,
-
     /// 终端渲染的主题样式配置。
     pub render_config: RenderConfig<'a>,
 
@@ -53,12 +49,6 @@ impl<'a> Confirm<'a> {
     pub const DEFAULT_ERROR_MESSAGE: &'a str =
         "Invalid answer, try typing 'y' for yes or 'n' for no";
 
-    /// 默认未敲定答案时，提示文本的格式化器。
-    pub const DEFAULT_DEFAULT_VALUE_FORMATTER: BoolFormatter<'a> = &|ans| match ans {
-        true => String::from("Y/n"),
-        false => String::from("y/N"),
-    };
-
     /// 创建一个全新的、带默认配置的 [Confirm] 实例。
     pub fn new(message: &'a str) -> Self {
         Self {
@@ -66,7 +56,6 @@ impl<'a> Confirm<'a> {
             default: None,
             help_message: None,
             formatter: Self::DEFAULT_FORMATTER,
-            default_value_formatter: Self::DEFAULT_DEFAULT_VALUE_FORMATTER,
             render_config: get_configuration(),
             error_meesage: String::from(Self::DEFAULT_ERROR_MESSAGE),
         }
@@ -93,12 +82,6 @@ impl<'a> Confirm<'a> {
     /// 覆写最终结果的格式化函数。
     pub fn with_formatter(mut self, formatter: BoolFormatter<'a>) -> Self {
         self.formatter = formatter;
-        self
-    }
-
-    /// 覆写未敲定默认值前的展示格式化函数。
-    pub fn with_default_value_formatter(mut self, formatter: BoolFormatter<'a>) -> Self {
-        self.default_value_formatter = formatter;
         self
     }
 

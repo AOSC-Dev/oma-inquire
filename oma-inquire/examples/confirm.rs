@@ -23,10 +23,6 @@ fn main() {
             true => "sim".to_owned(),
             false => "não".to_owned(),
         },
-        default_value_formatter: &|def| match def {
-            true => String::from("sim"),
-            false => String::from("não"),
-        },
         render_config: RenderConfig::default(),
         error_meesage: "Invalid answer, try typing 'y' for yes or 'n' for no".to_string()
     }

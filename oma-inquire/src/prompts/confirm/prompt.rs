@@ -21,7 +21,6 @@ pub struct ConfirmPrompt<'a> {
     error_message: String,
     error: Option<ErrorMessage>,
     formatter: BoolFormatter<'a>,
-    default_value_formatter: BoolFormatter<'a>,
 }
 
 impl<'a> From<Confirm<'a>> for ConfirmPrompt<'a> {
@@ -34,7 +33,6 @@ impl<'a> From<Confirm<'a>> for ConfirmPrompt<'a> {
             current_value,
             help_message: co.help_message,
             formatter: co.formatter,
-            default_value_formatter: co.default_value_formatter,
             error_message: co.error_meesage,
             error: None,
         }
@@ -99,7 +97,11 @@ where
         }
 
         // 格式化括号内默认值的提示，如 "Y/n"
-        let default_value_formatter = self.default_value_formatter;
+        let default_value_formatter = |ans| match ans {
+            true => String::from("Y/n"),
+            false => String::from("y/N"),
+        };
+
         let default_message = self
             .default
             .as_ref()

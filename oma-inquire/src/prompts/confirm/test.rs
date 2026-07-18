@@ -120,10 +120,6 @@ fn custom_formatter_for_default_values_is_used(
 
     let _ = Confirm::new("Question")
         .with_default(default_value)
-        .with_default_value_formatter(&|d| match d {
-            true => "y".into(),
-            false => "n".into(),
-        })
         .prompt_with_backend(&mut backend)?;
 
     let rendered_frames = backend.frames();
