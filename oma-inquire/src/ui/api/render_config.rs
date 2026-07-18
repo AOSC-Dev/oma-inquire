@@ -1,5 +1,7 @@
 use std::env;
 
+use crate::ui::Attributes;
+
 use super::{Color, StyleSheet, Styled};
 
 /// Rendering configuration that can be applied to a prompt.
@@ -193,8 +195,8 @@ impl<'a> RenderConfig<'a> {
         Self {
             prompt_prefix: Styled::new("?").with_fg(Color::LightGreen),
             answered_prompt_prefix: Styled::new(">").with_fg(Color::LightGreen),
-            prompt: StyleSheet::empty(),
-            default_value: StyleSheet::empty(),
+            prompt: StyleSheet::empty().with_attr(Attributes::BOLD),
+            default_value: StyleSheet::empty().with_fg(Color::DarkGrey),
             placeholder: StyleSheet::new().with_fg(Color::DarkGrey),
             help_message: StyleSheet::empty().with_fg(Color::LightCyan),
             text_input: StyleSheet::empty(),
