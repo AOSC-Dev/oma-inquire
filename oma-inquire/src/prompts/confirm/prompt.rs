@@ -78,7 +78,7 @@ where
                     self.current_value = default_val;
                     ActionState::RequestSubmit
                 } else {
-                    self.error = Some(ErrorMessage::Custom(self.error_message.to_string()));
+                    self.error = Some(ErrorMessage::Custom(self.error_message.clone()));
                     ActionState::Render(ActionResult::NeedsRedraw)
                 }
             }

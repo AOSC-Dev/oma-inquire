@@ -744,7 +744,7 @@ where
     fn render_prompt(&mut self, prompt: &str, default: Option<&str>) -> InquireResult<()> {
         let options_str = default.unwrap_or("y/n");
         let virtual_input = Input::new_with("");
-        self.print_prompt_with_input(prompt, Some(&options_str), &virtual_input)?;
+        self.print_prompt_with_input(prompt, Some(options_str), &virtual_input)?;
 
         Ok(())
     }

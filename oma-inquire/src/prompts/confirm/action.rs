@@ -23,12 +23,8 @@ impl InnerAction for ConfirmPromptAction {
 
     fn from_key(key: Key, _config: &Self::Config) -> Option<Self> {
         match key {
-            Key::Char('y', KeyModifiers::NONE)
-            | Key::Char('Y', KeyModifiers::NONE)
-            | Key::Char('Y', KeyModifiers::SHIFT) => Some(Self::DirectSubmit(true)),
-            Key::Char('n', KeyModifiers::NONE)
-            | Key::Char('N', KeyModifiers::NONE)
-            | Key::Char('N', KeyModifiers::SHIFT) => Some(Self::DirectSubmit(false)),
+            Key::Char('y' | 'Y', KeyModifiers::NONE) | Key::Char('Y', KeyModifiers::SHIFT) => Some(Self::DirectSubmit(true)),
+            Key::Char('n' | 'N', KeyModifiers::NONE) | Key::Char('N', KeyModifiers::SHIFT) => Some(Self::DirectSubmit(false)),
             Key::Enter
             | Key::Char('\n', KeyModifiers::NONE)
             | Key::Char('j', KeyModifiers::CONTROL) => Some(Self::SubmitDefault),

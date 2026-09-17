@@ -205,7 +205,7 @@ where
     fn render(&self, backend: &mut Backend) -> InquireResult<()> {
         let prompt = &self.message;
 
-        backend.render_sort_prompt(*prompt)?;
+        backend.render_sort_prompt(prompt)?;
 
         let choices = self
             .options
